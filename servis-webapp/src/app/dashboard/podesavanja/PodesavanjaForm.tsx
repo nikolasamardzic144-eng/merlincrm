@@ -64,7 +64,7 @@ export default function PodesavanjaForm() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow p-6 space-y-5">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
       <div>
         <h2 className="text-base font-medium text-gray-900 mb-1">
           WhatsApp nalog

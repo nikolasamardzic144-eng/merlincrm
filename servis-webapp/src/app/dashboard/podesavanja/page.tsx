@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import PodesavanjaForm from "./PodesavanjaForm";
 
@@ -12,26 +11,17 @@ export default async function PodesavanjaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">
-              {session.naziv}
-            </h1>
-            <p className="text-sm text-gray-500">Podešavanja WhatsApp naloga</p>
-          </div>
-          <Link
-            href="/dashboard"
-            className="text-sm text-gray-500 hover:text-gray-900"
-          >
-            ← Nazad na klijente
-          </Link>
-        </div>
-      </header>
-      <main className="max-w-2xl mx-auto px-4 py-8">
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-gray-900">Podešavanja</h1>
+        <p className="text-sm text-gray-500 mt-0.5">
+          WhatsApp nalog i osnovni podaci o biznisu
+        </p>
+      </div>
+
+      <div className="max-w-2xl">
         <PodesavanjaForm />
-      </main>
+      </div>
     </div>
   );
 }

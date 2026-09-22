@@ -14,7 +14,7 @@ export default function LogoutButton() {
   return (
     <button
       onClick={odjava}
-      className="text-sm text-gray-500 hover:text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5"
+      className="w-full text-left text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg px-3 py-2 transition-colors"
     >
       Odjavi se
     </button>

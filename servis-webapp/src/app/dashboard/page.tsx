@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getPool } from "@/lib/db";
 import { Klijent } from "@/lib/types";
 import DashboardKlijenti from "./DashboardKlijenti";
 import DashboardStatistika from "./DashboardStatistika";
-import LogoutButton from "./LogoutButton";
 
 export const dynamic = "force-dynamic";
 
@@ -22,30 +20,16 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">
-              {session.naziv}
-            </h1>
-            <p className="text-sm text-gray-500">Pregled klijenata i servisa</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/dashboard/podesavanja"
-              className="text-sm text-gray-500 hover:text-gray-900"
-            >
-              Podešavanja
-            </Link>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <DashboardStatistika klijenti={result.rows} />
-        <DashboardKlijenti pocetniKlijenti={result.rows} />
-      </main>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-gray-900">Klijenti</h1>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Pregled klijenata i statusa servisa
+        </p>
+      </div>
+
+      <DashboardStatistika klijenti={result.rows} />
+      <DashboardKlijenti pocetniKlijenti={result.rows} />
     </div>
   );
 }

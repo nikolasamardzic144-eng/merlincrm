@@ -81,25 +81,25 @@ export default function DashboardKlijenti({
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base font-medium text-gray-900">
-          Klijenti ({klijenti.length})
+          Svi klijenti <span className="text-gray-400 font-normal">({klijenti.length})</span>
         </h2>
         <button
           onClick={otvoriNovi}
-          className="bg-gray-900 text-white text-sm rounded-lg px-4 py-2 hover:bg-gray-800"
+          className="bg-gray-900 text-white text-sm font-medium rounded-lg px-4 py-2 hover:bg-gray-800 transition-colors"
         >
           + Novi klijent
         </button>
       </div>
 
       {poruka && (
-        <div className="mb-4 text-sm bg-blue-50 text-blue-800 rounded-lg px-3 py-2">
+        <div className="mb-4 text-sm bg-blue-50 text-blue-800 rounded-lg px-3 py-2 border border-blue-100">
           {poruka}
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-500 text-left">
+          <thead className="bg-gray-50/80 text-gray-500 text-left border-b border-gray-100">
             <tr>
               <th className="px-4 py-3 font-medium">Ime</th>
               <th className="px-4 py-3 font-medium">Telefon</th>
@@ -112,7 +112,7 @@ export default function DashboardKlijenti({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {klijenti.map((k) => (
-              <tr key={k.id} className="hover:bg-gray-50">
+              <tr key={k.id} className="hover:bg-gray-50/70 transition-colors">
                 <td className="px-4 py-3 font-medium text-gray-900">
                   {k.ime}
                 </td>

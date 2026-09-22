@@ -65,7 +65,9 @@ export default function DashboardKlijenti({
           prev.map((p) => (p.id === k.id ? data.klijent : p))
         );
         setPoruka(
-          `Klijent ${k.ime} je označen kao spreman za podsetnik — n8n će mu poslati poruku na sledećoj automatskoj proveri.`
+          data.instant
+            ? `Podsetnik je odmah poslat klijentu ${k.ime} na WhatsApp.`
+            : `Klijent ${k.ime} je označen kao spreman za podsetnik — n8n će mu poslati poruku na sledećoj automatskoj proveri (instant slanje trenutno nije podešeno).`
         );
       } else {
         setPoruka(data.error ?? "Greška.");

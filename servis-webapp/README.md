@@ -29,11 +29,24 @@ npm run dev
 
 ## Šema baze koju koristi
 
-- `biznisi` — jedan red po tvom klijentu (firma), sadrži email/lozinku za login
-- `demo_klijenti` — klijenti servisa, sada sa `biznis_id` kolonom koja ih vezuje za firmu
+- `biznisi` — jedan red po tvom klijentu (firma): email/lozinka za login, i WhatsApp podaci (`whatsapp_phone_number_id`, `whatsapp_waba_id`, `whatsapp_access_token`)
+- `demo_klijenti` — klijenti servisa, sa `biznis_id` kolonom koja ih vezuje za firmu
+
+**Pre prvog deploya ove verzije**, pokreni jednom u Railway → Postgres servis → tab **Data** (ili Query), da doda kolonu za token:
+
+```sql
+ALTER TABLE biznisi ADD COLUMN IF NOT EXISTS whatsapp_access_token TEXT;
+ALTER TABLE biznisi ADD COLUMN IF NOT EXISTS whatsapp_app_id TEXT;
+```
+
+## Nove funkcije
+
+- **Instant slanje podsetnika** — dugme "Pošalji podsetnik" sad odmah zove n8n webhook koji šalje WhatsApp poruku u sekundi, umesto da čeka sledeću automatsku proveru. Radi kad su `N8N_INSTANT_WEBHOOK_URL` i `N8N_INSTANT_WEBHOOK_SECRET` podešeni (vidi `.env.example`); ako nisu, dugme se ponaša kao pre.
+- **Podešavanja** (`/dashboard/podešavanja`) — svaki biznis sad može sam da unese svoj WhatsApp Phone Number ID, WABA ID i Access Token.
+- **Statistika** na vrhu dashboarda — ukupno klijenata, koliko čeka podsetnik/potvrdu, koliko je potvrđeno, koliko čeka naplatu (sa iznosom).
+- **Admin panel** (`/admin/novi-biznis`) — zaštićen Basic Auth-om (`ADMIN_USER`/`ADMIN_PASSWORD` u Railway Variables), za dodavanje novog biznisa (klijenta) bez ručnog SQL-a.
 
 ## Šta dalje (predlog)
 
-- Dodavanje novog biznisa (trenutno se radi ručno preko SQL-a ili n8n Setup workflow-a — može se napraviti "signup" stranica ako zatreba)
-- Podešavanja po biznisu (WhatsApp broj, template poruke) direktno iz webapp-a
-- Prava trenutna (instant) automatika za "Pošalji podsetnik sad" dugme, preko posebnog n8n webhook-a, umesto čekanja na sledeću automatsku proveru
+- **Puno multi-tenant WhatsApp slanje** — trenutno SVI biznisi i dalje šalju preko istog WhatsApp naloga (jedan n8n credential/token), čak i kad svaki unese svoje podatke u Podešavanjima — ti podaci se čuvaju, ali automatika ih još ne koristi za slanje. Da svaki biznis stvarno šalje sa svog broja, WhatsApp send node-ovi u n8n moraju da pređu sa fiksnog kredencijala na HTTP Request node koji dinamički uzima token iz baze. Ovo namerno nije urađeno dok ne dobiješ drugog pravog klijenta sa svojim WABA nalogom — prevelika je i rizična izmena da se testira samo na demo podacima.
+- Multi-user po biznisu (više zaposlenih istog klijenta sa svojim login-om)

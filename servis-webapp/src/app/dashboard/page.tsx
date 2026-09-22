@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getPool } from "@/lib/db";
 import { Klijent } from "@/lib/types";
 import DashboardKlijenti from "./DashboardKlijenti";
+import DashboardStatistika from "./DashboardStatistika";
 import LogoutButton from "./LogoutButton";
 
 export const dynamic = "force-dynamic";
@@ -29,10 +31,19 @@ export default async function DashboardPage() {
             </h1>
             <p className="text-sm text-gray-500">Pregled klijenata i servisa</p>
           </div>
-          <LogoutButton />
+          <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard/podesavanja"
+              className="text-sm text-gray-500 hover:text-gray-900"
+            >
+              Podešavanja
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8">
+        <DashboardStatistika klijenti={result.rows} />
         <DashboardKlijenti pocetniKlijenti={result.rows} />
       </main>
     </div>

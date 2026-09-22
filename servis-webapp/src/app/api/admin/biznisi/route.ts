@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getPool } from "@/lib/db";
+import { PREDLOSCI_META } from "@/lib/predlosci";
 
 // Zasticeno preko middleware.ts (Basic Auth, /api/admin/*).
 export async function GET() {
@@ -40,7 +41,36 @@ export async function POST(req: NextRequest) {
         whatsapp_waba_id || null,
       ]
     );
-    return NextResponse.json({ biznis: result.rows[0] });
+
+    const biznis = result.rows[0];
+
+    // Nalog za prijavu (tabela korisnici) i podrazumevani predlosci poruka.
+    // Ako te tabele jos ne postoje, biznis je ipak kreiran - login ima fallback.
+    try {
+      await pool.query(
+        `INSERT INTO korisnici (biznis_id, ime, email, lozinka_hash, uloga)
+         VALUES ($1, $2, $3, $4, 'vlasnik')
+         ON CONFLICT (email) DO NOTHING`,
+        [biznis.id, naziv, biznis.email, hash]
+      );
+    } catch {
+      // tabela korisnici jos ne postoji
+    }
+
+    try {
+      for (const m of PREDLOSCI_META) {
+        await pool.query(
+          `INSERT INTO predlosci (biznis_id, kljuc, tekst)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (biznis_id, kljuc) DO NOTHING`,
+          [biznis.id, m.kljuc, m.podrazumevano]
+        );
+      }
+    } catch {
+      // tabela predlosci jos ne postoji
+    }
+
+    return NextResponse.json({ biznis });
   } catch (err: unknown) {
     const message =
       err instanceof Error && err.message.includes("duplicate")

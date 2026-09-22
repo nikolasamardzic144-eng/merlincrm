@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { getPool } from "@/lib/db";
 import { Klijent } from "@/lib/types";
+import { uObicanJson } from "@/lib/serijalizuj";
 import DashboardKlijenti from "./DashboardKlijenti";
 import DashboardStatistika from "./DashboardStatistika";
 
@@ -19,6 +20,8 @@ export default async function DashboardPage() {
     [session.biznisId]
   );
 
+  const klijenti = uObicanJson(result.rows);
+
   return (
     <div>
       <div className="mb-6">
@@ -28,8 +31,8 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <DashboardStatistika klijenti={result.rows} />
-      <DashboardKlijenti pocetniKlijenti={result.rows} />
+      <DashboardStatistika klijenti={klijenti} />
+      <DashboardKlijenti pocetniKlijenti={klijenti} />
     </div>
   );
 }

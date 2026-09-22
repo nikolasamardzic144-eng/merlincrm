@@ -56,16 +56,26 @@ function IconTim() {
   );
 }
 
+function IconTelefon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" stroke="currentColor" className="w-5 h-5">
+      <rect x="7" y="2.75" width="10" height="18.5" rx="2" />
+      <path strokeLinecap="round" d="M11 18.5h2" />
+    </svg>
+  );
+}
+
 const AKTIVNO = [
   { href: "/dashboard", label: "Klijenti", icon: IconKlijenti },
+  { href: "/dashboard/fakture", label: "Fakture i naplata", icon: IconFakture },
+  { href: "/dashboard/izvestaji", label: "Izveštaji", icon: IconIzvestaji },
+  { href: "/dashboard/predlosci", label: "Predlošci poruka", icon: IconPredlosci },
+  { href: "/dashboard/tim", label: "Tim", icon: IconTim },
   { href: "/dashboard/podesavanja", label: "Podešavanja", icon: IconPodesavanja },
 ];
 
 const USKORO = [
-  { label: "Fakture i naplata", icon: IconFakture },
-  { label: "Izveštaji", icon: IconIzvestaji },
-  { label: "Predlošci poruka", icon: IconPredlosci },
-  { label: "Tim", icon: IconTim },
+  { label: "Dodatni brojevi", icon: IconTelefon },
 ];
 
 function NavContent({ naziv, email }: { naziv: string; email: string }) {
@@ -107,8 +117,8 @@ function NavContent({ naziv, email }: { naziv: string; email: string }) {
             title="Uskoro dostupno"
           >
             <Icon />
-            <span className="flex-1">{label}</span>
-            <span className="text-[10px] bg-gray-800 text-gray-400 rounded-full px-1.5 py-0.5">
+            <span className="flex-1 truncate">{label}</span>
+            <span className="text-[10px] bg-gray-800 text-gray-400 rounded-full px-1.5 py-0.5 shrink-0">
               uskoro
             </span>
           </div>

@@ -18,6 +18,10 @@ export type SessionPayload = {
   biznisId: number;
   email: string;
   naziv: string;
+  // Dodato uz tabelu korisnika (multi-user po biznisu). Opciono je da stare
+  // sesije iz prethodne verzije i dalje rade dok ne isteknu.
+  korisnikId?: number;
+  uloga?: string; // 'vlasnik' | 'clan'
 };
 
 export function signSession(payload: SessionPayload): string {

@@ -39,14 +39,54 @@ ALTER TABLE biznisi ADD COLUMN IF NOT EXISTS whatsapp_access_token TEXT;
 ALTER TABLE biznisi ADD COLUMN IF NOT EXISTS whatsapp_app_id TEXT;
 ```
 
-## Nove funkcije
+## Funkcije
 
-- **Instant slanje podsetnika** — dugme "Pošalji podsetnik" sad odmah zove n8n webhook koji šalje WhatsApp poruku u sekundi, umesto da čeka sledeću automatsku proveru. Radi kad su `N8N_INSTANT_WEBHOOK_URL` i `N8N_INSTANT_WEBHOOK_SECRET` podešeni (vidi `.env.example`); ako nisu, dugme se ponaša kao pre.
-- **Podešavanja** (`/dashboard/podešavanja`) — svaki biznis sad može sam da unese svoj WhatsApp Phone Number ID, WABA ID i Access Token.
-- **Statistika** na vrhu dashboarda — ukupno klijenata, koliko čeka podsetnik/potvrdu, koliko je potvrđeno, koliko čeka naplatu (sa iznosom).
-- **Admin panel** (`/admin/novi-biznis`) — zaštićen Basic Auth-om (`ADMIN_USER`/`ADMIN_PASSWORD` u Railway Variables), za dodavanje novog biznisa (klijenta) bez ručnog SQL-a.
+- **Klijenti** (`/dashboard`) — pregled sa statistikom, dodavanje/izmena/brisanje, dugme „Pošalji podsetnik" koje preko n8n webhook-a odmah šalje WhatsApp poruku.
+- **Fakture i naplata** (`/dashboard/fakture`) — sve fakture koje je automatika poslala (n8n ih upisuje sam), plus ručni unos; filter naplaćeno/nenaplaćeno, označavanje naplate, link ka PDF-u.
+- **Izveštaji** (`/dashboard/izvestaji`) — naplaćen prihod po mesecima, broj izdatih faktura po mesecima, raspored klijenata po fazama procesa, plus tabelarni prikaz istih podataka.
+- **Predlošci poruka** (`/dashboard/predlosci`) — tekst slobodnih odgovora koje sistem šalje (potvrda termina, izmena termina, odložena provera, molba za recenziju, tekst uz fakturu). n8n ih čita iz baze po biznisu; ako predložak ne postoji, koristi se podrazumevani tekst. WhatsApp „template" poruke (prvi podsetnik, pitanje o obavljenom poslu) se i dalje menjaju u Meta panelu jer ih Meta odobrava.
+- **Tim** (`/dashboard/tim`) — više korisnika po biznisu, uloge vlasnik/član. Prijava ide preko tabele `korisnici` (sa fallback-om na `biznisi` za stare naloge).
+- **Podešavanja** (`/dashboard/podesavanja`) — WhatsApp Phone Number ID, WABA ID i Access Token po biznisu.
+- **Admin panel** (`/admin/novi-biznis`) — zaštićen Basic Auth-om (`ADMIN_USER` / `ADMIN_PASSWORD`), dodaje novi biznis i odmah mu kreira nalog za prijavu i podrazumevane predloške.
 
-## Šta dalje (predlog)
+## Šema baze
 
-- **Puno multi-tenant WhatsApp slanje** — trenutno SVI biznisi i dalje šalju preko istog WhatsApp naloga (jedan n8n credential/token), čak i kad svaki unese svoje podatke u Podešavanjima — ti podaci se čuvaju, ali automatika ih još ne koristi za slanje. Da svaki biznis stvarno šalje sa svog broja, WhatsApp send node-ovi u n8n moraju da pređu sa fiksnog kredencijala na HTTP Request node koji dinamički uzima token iz baze. Ovo namerno nije urađeno dok ne dobiješ drugog pravog klijenta sa svojim WABA nalogom — prevelika je i rizična izmena da se testira samo na demo podacima.
-- Multi-user po biznisu (više zaposlenih istog klijenta sa svojim login-om)
+- `biznisi` — jedan red po firmi (naziv, WhatsApp podaci)
+- `korisnici` — nalozi za prijavu, vezani za biznis, uloga `vlasnik` ili `clan`
+- `demo_klijenti` — klijenti servisa, sa `biznis_id`
+- `fakture` — izdate fakture (broj, iznos, datum, status naplate, PDF link)
+- `predlosci` — tekst automatskih poruka po biznisu (`kljuc` + `tekst`)
+
+Migracije su već puštene na produkcijskoj bazi. Za novu bazu, SQL je:
+
+```sql
+ALTER TABLE biznisi ADD COLUMN IF NOT EXISTS whatsapp_access_token TEXT;
+ALTER TABLE biznisi ADD COLUMN IF NOT EXISTS whatsapp_app_id TEXT;
+
+CREATE TABLE IF NOT EXISTS fakture (
+  id SERIAL PRIMARY KEY,
+  biznis_id INTEGER NOT NULL REFERENCES biznisi(id),
+  klijent_id INTEGER, broj TEXT, ime_klijenta TEXT, telefon TEXT, usluga TEXT,
+  iznos NUMERIC, datum DATE NOT NULL DEFAULT CURRENT_DATE,
+  status TEXT NOT NULL DEFAULT 'nenaplaceno', pdf_url TEXT,
+  naplaceno_at TIMESTAMP, created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS predlosci (
+  id SERIAL PRIMARY KEY,
+  biznis_id INTEGER NOT NULL REFERENCES biznisi(id),
+  kljuc TEXT NOT NULL, tekst TEXT NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(), UNIQUE (biznis_id, kljuc)
+);
+
+CREATE TABLE IF NOT EXISTS korisnici (
+  id SERIAL PRIMARY KEY,
+  biznis_id INTEGER NOT NULL REFERENCES biznisi(id),
+  ime TEXT, email TEXT NOT NULL UNIQUE, lozinka_hash TEXT NOT NULL,
+  uloga TEXT NOT NULL DEFAULT 'clan', created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+```
+
+## Šta dalje
+
+- **Puno multi-tenant WhatsApp slanje** — svi biznisi i dalje šalju preko istog WhatsApp naloga (jedan n8n credential). Podaci koje biznis unese u Podešavanjima se čuvaju, ali automatika ih još ne koristi za slanje. Da svaki biznis šalje sa svog broja, WhatsApp send node-ovi u n8n moraju da pređu sa fiksnog kredencijala na HTTP Request node koji dinamički uzima token iz baze — namerno odloženo dok ne postoji drugi pravi klijent sa svojim WABA nalogom, da izmena može da se testira na stvarnom broju.
